@@ -59,6 +59,136 @@ df['salary'].iloc[0]
 df['salary'] = df['salary'].apply(lambda x:x.replace("$",''))
 df['salary'] = df['salary'].apply(lambda x:x.replace("k",''))
 
+
+/////////////////////////////////////////////////Q2****************************************************************************************//
+Question :2->>
+
+Apply data pre-processing techniques such as standardization/normalization, transformation, 
+aggregation, discretization/binarization, sampling etc. on any dataset
+
+Answer:->>
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, PowerTransformer, KBinsDiscretizer, Binarizer
+from sklearn.model_selection import train_test_split
+
+# Define the dataset
+data = {'Category': ['A', 'B', 'A', 'B'],
+        'Sales': [100, 150, 80, 120],
+        'Age': [25, 40, 35, 28],
+        'Customers': [10, 15, 8, 12]}
+df = pd.DataFrame(data)
+
+# Print original dataset
+print("Original Dataset:")
+print(df)
+print()
+
+# Standardization
+scaler = StandardScaler()
+df_standardized = pd.DataFrame(scaler.fit_transform(df[['Sales', 'Age', 'Customers']]), columns=['Sales', 'Age', 'Customers'])
+print("Standardized Dataset:")
+print(df_standardized)
+print()
+
+# Normalization
+min_max_scaler = MinMaxScaler()
+df_normalized = pd.DataFrame(min_max_scaler.fit_transform(df[['Sales', 'Age', 'Customers']]), columns=['Sales', 'Age', 'Customers'])
+print("Normalized Dataset:")
+print(df_normalized)
+print()
+
+# Transformation
+power_transformer = PowerTransformer()
+df_transformed = pd.DataFrame(power_transformer.fit_transform(df[['Sales', 'Age', 'Customers']]), columns=['Sales', 'Age', 'Customers'])
+print("Transformed Dataset:")
+print(df_transformed)
+print()
+
+# Aggregation
+aggregated_df = df.groupby('Category').agg({'Sales': 'sum', 'Age': 'mean', 'Customers': 'sum'}).reset_index()
+print("Aggregated Dataset:")
+print(aggregated_df)
+print()
+
+# Discretization
+kbins_discretizer = KBinsDiscretizer(n_bins=3, encode='ordinal', strategy='uniform')
+df_discretized = pd.DataFrame(kbins_discretizer.fit_transform(df[['Sales', 'Age', 'Customers']]), columns=['Sales', 'Age', 'Customers'])
+print("Discretized Dataset:")
+print(df_discretized)
+print()
+
+# Binarization
+binarizer = Binarizer(threshold=100)  # Threshold for binarization
+df_binarized = pd.DataFrame(binarizer.fit_transform(df[['Sales', 'Age', 'Customers']]), columns=['Sales', 'Age', 'Customers'])
+print("Binarized Dataset (Threshold = 100):")
+print(df_binarized)
+print()
+
+# Sampling
+sampled_df = df.sample(n=2, random_state=42)  # Sample 2 rows randomly
+print("Sampled Dataset:")
+print(sampled_df)
+print()
+
+
+
+Outputs :-->>>
+
+Original Dataset:
+  Category  Sales  Age  Customers
+0        A    100   25         10
+1        B    150   40         15
+2        A     80   35          8
+3        B    120   28         12
+
+Standardized Dataset:
+      Sales       Age  Customers
+0 -0.483368 -1.191759  -0.483368
+1  1.450105  1.362010   1.450105
+2 -1.256757  0.510754  -1.256757
+3  0.290021 -0.681005   0.290021
+
+Normalized Dataset:
+      Sales       Age  Customers
+0  0.285714  0.000000   0.285714
+1  1.000000  1.000000   1.000000
+2  0.000000  0.666667   0.000000
+3  0.571429  0.200000   0.571429
+
+Transformed Dataset:
+      Sales       Age  Customers
+0 -0.394248 -1.263073  -0.396742
+1  1.358478  1.290706   1.360459
+2 -1.357968  0.593778  -1.355750
+3  0.393738 -0.621411   0.392033
+
+Aggregated Dataset:
+  Category  Sales   Age  Customers
+0        A    180  30.0         18
+1        B    270  34.0         27
+
+C:\Users\ASHISH UPADHYAY\AppData\Local\Programs\Python\Python311\Lib\site-packages\sklearn\preprocessing\_discretization.py:248: FutureWarning: In version 1.5 onwards, subsample=200_000 will be used by default. Set subsample explicitly to silence this warning in the mean time. Set subsample=None to disable subsampling explicitly.
+  warnings.warn(
+Discretized Dataset:
+   Sales  Age  Customers
+0    0.0  0.0        0.0
+1    2.0  2.0        2.0
+2    0.0  2.0        0.0
+3    1.0  0.0        1.0
+
+Binarized Dataset (Threshold = 100):
+   Sales  Age  Customers
+0      0    0          0
+1      1    0          0
+2      0    0          0
+3      1    0          0
+
+Sampled Dataset:
+  Category  Sales  Age  Customers
+1        B    150   40         15
+3        B    120   28         12
+
 // Q3+++++++++++++++++++++++++++++++++++++++*********************************************************//
 Q33. Run Apriori algorithm to find frequent item sets and association rules on 2 real datasets and use
 appropriate evaluation measures to compute correctness of obtained patterns
