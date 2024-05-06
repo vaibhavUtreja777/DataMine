@@ -1,0 +1,439 @@
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_wine
+#loading the wine dataset
+wine_data = load_wine()
+wine_data
+wine_dataset = pd.DataFrame(data=wine_data.data, columns=wine_data.feature_names)
+wine_dataset
+#Adding some missing value to dataset for demonstration
+wine_dataset.loc[3:6 , "proline"] = np.nan
+wine_dataset.head(10)
+#Checking for the missing values
+wine_dataset.isnull().sum()
+#Handlng the missing value
+# wine_dataset["proline"].fillna(wine_dataset["proline"].mean(), inplace = True)
+wine_dataset.isnull().sum()
+# Handling outliers using z-score
+from scipy import stats
+z_scores = np.abs(stats.zscore(wine_dataset))
+outlier_indices = np.where(z_scores > 3)  # Using a z-score threshold of 3 for outliers
+wine_dataset_cleaned = wine_dataset.drop(outlier_indices[0])
+wine_dataset_cleaned
+# Handling inconsistent values (if any)
+# For demonstration, let's assume 'alcohol' values should be in the range [10, 20]
+wine_dataset_cleaned['alcohol'] = np.where((wine_dataset_cleaned['alcohol'] < 10) | (wine_dataset_cleaned['alcohol'] > 20),
+                                      np.nan, wine_dataset_cleaned['alcohol'])
+wine_dataset_cleaned['alcohol'].fillna(wine_dataset_cleaned['alcohol'].mean(), inplace=True)
+
+# Check for missing values after handling outliers and inconsistent values
+print("Missing values after handling outliers and inconsistent values:")
+print(wine_dataset_cleaned.isnull().sum())
+
+
+
+
+
+
+
+
+
+
+
+
+#Question 2
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import SelectKBest, f_classif
+
+data = {"Category": ["A","B","A","B"],
+           "Sales" : [100, 150, 80 , 120],
+        "Age" : [25, 40, 35, 28],
+        "Customer": [10, 15, 8, 12],
+       }
+df = pd.DataFrame(data)
+df
+#Aggregation
+df_aggreated = df.groupby('Category')['Sales'].sum()
+df_aggreated
+#Feature Creation
+df["Sales_per_Person"] = df["Sales"]/df["Customer"]
+print("Sales per person is given: ")
+print(df["Sales_per_Person"])
+
+#Binarization
+df["Binary Age"] = (df["Age"]>30).astype(int)
+print("Binary Age")
+print(df)
+
+
+#Sampling
+sample_df = df.sample(frac = 0.3, random_state = 42)
+# sample_df = df.sample(2, random_state = 42)
+
+sample_df
+
+#Variable transformation
+ages = [23,45,67,98,23,49]
+#Tranforming the variable in squre root
+transform_ages = [age**0.5 for age in ages]
+df["Age"] = df["Age"]**2
+df
+
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# Create the dataset
+data = {
+    "Category": ["A", "B", "A", "B"],
+    "Sales": [100, 150, 80, 120],
+    "Age": [25, 40, 35, 28],
+    "Customer": [10, 15, 8, 12],
+}
+df = pd.DataFrame(data)
+
+# Separate numerical columns for scaling
+numerical_columns = ["Sales", "Age", "Customer"]
+numerical_data = df[numerical_columns]
+print(numerical_data)
+
+# Standardization
+scaler_standard = StandardScaler()
+scaled_standard = scaler_standard.fit_transform(numerical_data)
+df_standardized = pd.DataFrame(scaled_standard, columns=numerical_columns)
+
+# Normalization
+scaler_minmax = MinMaxScaler()
+scaled_minmax = scaler_minmax.fit_transform(numerical_data)
+df_normalized = pd.DataFrame(scaled_minmax, columns=numerical_columns)
+
+print("Standardized Data:")
+print(df_standardized)
+
+print("\nNormalized Data:")
+print(df_normalized)
+
+
+
+#Question 3
+#Aprori Alogrithm
+
+
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+import pandas as pd
+import numpy as np
+
+# Define a simple dataset of transactions
+dataset = [['milk', 'bread', 'butter'],
+           ['milk', 'bread'],
+           ['milk', 'eggs'],
+           ['bread', 'eggs'],
+           ['bread', 'butter']]
+
+# Encode the dataset
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+print(df)
+
+# Run Apriori algorithm with minimum support of 50% and minimum confidence of 75%
+frequent_itemsets_a = apriori(df, min_support=0.5, use_colnames=True)
+rules_a = association_rules(frequent_itemsets_a, metric="confidence", min_threshold=0.75)
+
+# Run Apriori algorithm with minimum support of 60% and minimum confidence of 60%
+frequent_itemsets_b = apriori(df, min_support=0.6, use_colnames=True)
+rules_b = association_rules(frequent_itemsets_b, metric="confidence", min_threshold=0.6)
+
+# Print the results
+print("Results for minimum support 50% and minimum confidence 75%:")
+print(frequent_itemsets_a)
+print(rules_a)
+
+print("\nResults for minimum support 60% and minimum confidence 60%:")
+print(frequent_itemsets_b)
+print(rules_b)
+
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+import pandas as pd
+import numpy as np
+
+#define simple dataset for encoding
+data = [
+    ['milk', 'bread', 'butter', 'egg'],
+    ['milk', 'bread'],
+           ['milk', 'eggs'],
+           ['bread', 'eggs'],
+           ['bread', 'butter']
+]
+
+#Encode the dataset
+te = TransactionEncoder()
+te_ary = te.fit(data).transform(data)
+df = pd.DataFrame(te_ary, columns = te.columns_)
+
+
+frequent_itemsets_a = apriori(df, min_support=0.5, use_colnames=True)
+rules_a = association_rules(frequent_itemsets_a, metric="confidence", min_threshold=0.75)
+
+frequent_itemsets_b = apriori(df, min_support=0.6, use_colnames=True)
+rules_b = association_rules(frequent_itemsets_a, metric = "confidence", min_threshold = 0.6)
+
+print("Result for minimum support as 50% and confidence as 75%")
+print(frequent_itemsets_a)
+print(rules_a)
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def initialize_centroids(k, data):
+    # Randomly initialize centroids
+    centroids = data[np.random.choice(data.shape[0], k, replace=False)]
+    return centroids
+
+def compute_distances(data, centroids):
+    # Compute distances between data points and centroids
+    distances = np.sqrt(((data - centroids[:, np.newaxis])**2).sum(axis=2))
+    return distances
+
+def assign_clusters(data, centroids):
+    # Assign data points to clusters based on closest centroid
+    distances = compute_distances(data, centroids)
+    clusters = np.argmin(distances, axis=0)
+    return clusters
+
+def update_centroids(data, clusters, k):
+    # Update centroids based on assigned clusters
+    new_centroids = np.array([data[clusters == i].mean(axis=0) for i in range(k)])
+    return new_centroids
+
+def compute_mse(data, centroids, clusters):
+    # Compute Mean Squared Error (MSE)
+    distances = compute_distances(data, centroids)
+    mse = np.mean(np.min(distances**2, axis=0))
+    return mse
+
+def k_means(data, k, max_iterations=100, tol=1e-4):
+    centroids = initialize_centroids(k, data)
+    mse_values = []
+    for _ in range(max_iterations):
+        clusters = assign_clusters(data, centroids)
+        new_centroids = update_centroids(data, clusters, k)
+        mse = compute_mse(data, new_centroids, clusters)
+        mse_values.append(mse)
+        if np.abs(np.sum(new_centroids - centroids)) < tol:
+            break
+        centroids = new_centroids
+    return centroids, clusters, mse_values
+
+# Generate synthetic data
+np.random.seed(0)
+data = np.random.rand(100, 2)
+
+# Set parameters for K-means
+k = 3  # Number of clusters
+max_iterations = 100  # Maximum number of iterations
+tolerance = 1e-4  # Tolerance for convergence
+
+# Run K-means algorithm
+centroids, clusters, mse_values = k_means(data, k, max_iterations, tolerance)
+
+# Plot MSE after each iteration
+plt.plot(range(1, len(mse_values) + 1), mse_values, marker='o')
+plt.xlabel('Iterations')
+plt.ylabel('Mean Squared Error (MSE)')
+plt.title('MSE vs. Iterations')
+plt.grid(True)
+plt.show()
+
+
+
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.metrics import mean_squared_error
+
+# Generate synthetic data
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.60, random_state=0)
+
+# Function to compute K-means clustering and plot MSE
+def compute_kmeans(parameters):
+    kmeans = KMeans(**parameters)
+    centroids_history = []
+    mse_history = []
+    for iteration in range(parameters['max_iter']):
+        kmeans.fit(X)
+        centroids = kmeans.cluster_centers_
+        labels = kmeans.labels_
+        mse = mean_squared_error(X, centroids[labels])
+        centroids_history.append(centroids)
+        mse_history.append(mse)
+    return mse_history, centroids_history
+
+# Define parameters for K-means clustering
+parameters_list = [
+    {'n_clusters': 2, 'init': 'random', 'max_iter': 10},
+    {'n_clusters': 3, 'init': 'k-means++', 'max_iter': 10},
+    {'n_clusters': 4, 'init': 'random', 'max_iter': 10},
+    {'n_clusters': 4, 'init': 'k-means++', 'max_iter': 10},
+]
+
+# Compute K-means clustering for each set of parameters and plot MSE
+plt.figure(figsize=(10, 6))
+for params in parameters_list:
+    mse_history, _ = compute_kmeans(params)
+    plt.plot(range(1, params['max_iter'] + 1), mse_history, label=f"Clusters: {params['n_clusters']}, Init: {params['init']}")
+
+plt.xlabel('Iteration')
+plt.ylabel('Mean Squared Error')
+plt.title('K-means Clustering Performance')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris, load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+# Load datasets
+iris_data = load_iris()
+breast_cancer_data = load_breast_cancer()
+
+# Function to build and evaluate classifiers
+def evaluate_classifiers(data, target, test_size):
+    # Split data into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=test_size, random_state=0)
+    
+    # Initialize classifiers
+    classifiers = {
+        'Naive Bayes': GaussianNB(),
+        'K-Nearest Neighbors': KNeighborsClassifier(),
+        'Decision Tree': DecisionTreeClassifier(random_state=0)
+    }
+    
+    results = {}
+    for name, clf in classifiers.items():
+        # Train classifier
+        clf.fit(X_train, y_train)
+        
+        # Make predictions
+        y_pred = clf.predict(X_test)
+        
+        # Compute accuracy
+        accuracy = accuracy_score(y_test, y_pred)
+        results[name] = accuracy
+    
+    return results
+
+# Evaluate classifiers on Iris dataset with different training/test splits
+print("Iris Dataset:")
+for test_size in [0.25, 0.33]:
+    results = evaluate_classifiers(iris_data.data, iris_data.target, test_size)
+    print(f"Test Size {test_size}: {results}")
+
+# Evaluate classifiers on Breast Cancer dataset with different training/test splits
+print("\nBreast Cancer Dataset:")
+for test_size in [0.25, 0.33]:
+    results = evaluate_classifiers(breast_cancer_data.data, breast_cancer_data.target, test_size)
+    print(f"Test Size {test_size}: {results}")
+
+
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris, load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score, KFold
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+# Load datasets
+iris_data = load_iris()
+breast_cancer_data = load_breast_cancer()
+
+# Scale the data to a standard format
+scaler = StandardScaler()
+iris_data_scaled = scaler.fit_transform(iris_data.data)
+bc_data_scaled = scaler.fit_transform(breast_cancer_data.data)
+
+# Function to build and evaluate classifiers with different training set selection methods
+def evaluate_classifiers(data, target, train_method):
+    results = {}
+    
+    if train_method == 'holdout':
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.25, random_state=0)
+        results['Holdout'] = evaluate_accuracy(X_train, X_test, y_train, y_test)
+    elif train_method == 'random_sub':
+        for _ in range(3):  # Perform 3 random subsamplings
+            X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.25, random_state=None)
+            results[f'Random Subsampling {_+1}'] = evaluate_accuracy(X_train, X_test, y_train, y_test)
+    elif train_method == 'cross_val':
+        kf = KFold(n_splits=3, shuffle=True, random_state=0)
+        for fold, (train_index, test_index) in enumerate(kf.split(data)):
+            X_train, X_test = data[train_index], data[test_index]
+            y_train, y_test = target[train_index], target[test_index]
+            results[f'Cross-Validation Fold {fold+1}'] = evaluate_accuracy(X_train, X_test, y_train, y_test)
+    
+    return results
+
+# Function to evaluate accuracy of classifiers
+def evaluate_accuracy(X_train, X_test, y_train, y_test):
+    classifiers = {
+        'Naive Bayes': GaussianNB(),
+        'K-Nearest Neighbors': KNeighborsClassifier(),
+        'Decision Tree': DecisionTreeClassifier(random_state=0)
+    }
+    results = {}
+    for name, clf in classifiers.items():
+        pipeline = make_pipeline(StandardScaler(), clf)
+        pipeline.fit(X_train, y_train)
+        y_pred = pipeline.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        results[name] = accuracy
+    return results
+
+# Evaluate classifiers using different training set selection methods on Iris dataset
+print("Iris Dataset:")
+for train_method in ['holdout', 'random_sub', 'cross_val']:
+    results = evaluate_classifiers(iris_data_scaled, iris_data.target, train_method)
+    print(f"Training Method: {train_method}")
+    print(results)
+
+# Evaluate classifiers using different training set selection methods on Breast Cancer dataset
+print("\nBreast Cancer Dataset:")
+for train_method in ['holdout', 'random_sub', 'cross_val']:
+    results = evaluate_classifiers(bc_data_scaled, breast_cancer_data.target, train_method)
+    print(f"Training Method: {train_method}")
+    print(results)
+
+
+
+
+
+
+
+
+
+
