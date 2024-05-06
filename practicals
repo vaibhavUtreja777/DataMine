@@ -1,0 +1,319 @@
+//                         Q1*******************************************************************************************************//
+Q1 Apply data cleaning techniques on any dataset (e,g, wine dataset). Techniques may include handling
+missing values, outliers, inconsistent values. A set of validation rules can be prepared based on the
+dataset and validations can be performed.
+
+
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot
+
+df = pd.read_csv("/kaggle/input/-datacleaningforbeginnerusingpandas/Data-cleaning-for-beginners-using-pandas.csv", index_col='Index')
+#Finding the shape of our data
+print(df.shape)
+
+#Looking for null values
+print('Total sum of Null values in data: ', df.isnull().sum().sum())
+print('\n ******')
+print(df.isnull().sum())
+
+#Fixing columns
+df.columns = df.columns.str.lower().str.replace(" ", "_")
+
+#Fixing age column
+print(df.age.mean())
+
+df['age'] = df.age.fillna(df.age.mean())
+df['age'] = df.age.round(decimals=1)
+
+print(df.age.isnull().sum())
+
+# Cleaning the established column
+df["established"] = df["established"].replace(-1,np.nan)
+df["established"].fillna('Unknown', inplace=True)
+
+df.location.astype
+
+#Cleaning the location column and splitting the city from the city short name
+
+df['location']= df['location'].str.replace("Australia Aus", "Australia, Aus")
+df['location_city'] = df['location'].str.split(",", expand=True).get(0)
+df['city_sign'] = df['location'].str.split(",", expand=True).get(1)
+df.drop('location', inplace=True, axis=1)
+
+# Cleaning the rating columns and replacing special character with Nan values
+df['rating'] = df["rating"].replace(-1,np.nan)
+
+#### Now replace the those nan values with the rating mean()
+df['rating'] = df["rating"].fillna(df['rating'].mean()).round(decimals=1)
+
+#Cleaning the easy_apply
+df['easy_apply'] = df['easy_apply'].replace("-1", "True")
+
+df['salary'].iloc[0]
+
+## We use replace method remove the unnecessary char 
+
+df['salary'] = df['salary'].apply(lambda x:x.replace("$",''))
+df['salary'] = df['salary'].apply(lambda x:x.replace("k",''))
+
+// Q3+++++++++++++++++++++++++++++++++++++++*********************************************************//
+Q33. Run Apriori algorithm to find frequent item sets and association rules on 2 real datasets and use
+appropriate evaluation measures to compute correctness of obtained patterns
+a) Use minimum support as 50% and minimum confidence as 75%
+b) Use minimum support as 60% and minimum confidence as 60 %
+
+
+from mlxtend.frequent_patterns import apriori, association_rules
+import pandas as pd
+
+# Load the Market Basket Optimization dataset
+# You can download it from: https://www.kaggle.com/irfanasrullah/groceries?select=groceries+-+groceries.csv
+# Assuming the file is named "market_basket.csv"
+market_basket = pd.read_csv("market_basket.csv")
+
+# Clean the dataset (if needed)
+market_basket.dropna(axis=0, inplace=True)
+
+# Convert the dataset to the required format for Apriori
+# Each row represents a transaction, and each column represents an item
+market_basket_encoded = market_basket.applymap(lambda x: 1 if x != 'None' else 0)
+
+# Run Apriori algorithm with minimum support as 50% and minimum confidence as 75%
+frequent_itemsets_a = apriori(market_basket_encoded, min_support=0.5, use_colnames=True)
+rules_a = association_rules(frequent_itemsets_a, metric="confidence", min_threshold=0.75)
+
+# Evaluate correctness of obtained patterns (you can use different measures)
+# For example, you can examine the number of rules, lift values, or any other metric of interest
+
+# Load the Online Retail dataset
+# You can download it from: https://archive.ics.uci.edu/ml/datasets/online+retail
+# Assuming the file is named "online_retail.csv"
+online_retail = pd.read_csv("online_retail.csv")
+
+# Clean the dataset (if needed)
+online_retail.dropna(axis=0, inplace=True)
+
+# Convert the dataset to the required format for Apriori
+# Each row represents a transaction, and each column represents an item
+online_retail_encoded = online_retail.groupby(['InvoiceNo', 'Description'])['Quantity'].sum().unstack().reset_index().fillna(0).set_index('InvoiceNo')
+online_retail_encoded = online_retail_encoded.applymap(lambda x: 1 if x > 0 else 0)
+
+# Run Apriori algorithm with minimum support as 60% and minimum confidence as 60%
+frequent_itemsets_b = apriori(online_retail_encoded, min_support=0.6, use_colnames=True)
+rules_b = association_rules(frequent_itemsets_b, metric="confidence", min_threshold=0.6)
+
+# Evaluate correctness of obtained patterns (you can use different measures)
+# For example, you can examine the number of rules, lift values, or any other metric of interest
+
+
+ //Q4 +++++++++++++++++++++++++++++++++++++++++++++++++++++++***************************************************************************//
+Q4. Use Naive bayes, K-nearest, and Decision tree classification algorithms and build classifiers on
+any two datasets. Divide the data set into training and test set. Compare the accuracy of the
+different classifiers under the following situations:
+I. a) Training set = 75% Test set = 25% b) Training set = 66.6% (2/3rd of total), Test set = 33.3%
+II. Training set is chosen by i) hold out method ii) Random subsampling iii) Cross-Validation.
+Compare the accuracy of the classifiers obtained. Data needs to be scaled to standard format
+
+# Visualization of correlation result with seaborn library heatmap.
+f, ax = plt.subplots(figsize = (12,10))
+sns.heatmap(data.corr(), annot = True, linewidths = 0.5, linecolor = "blue", fmt = ".4f", ax = ax)
+plt.show()
+
+# Visualization of correlation results with seaborn library pairplot
+sns.pairplot(data, hue = "gender")
+
+# Columns of data
+data.columns
+
+Male = data[data.gender == "Male"].iloc[:100,:]
+Female = data[data.gender == "Female"].iloc[:100,:]
+
+plt.figure(figsize = (8,8))
+plt.scatter(Male.forehead_height_cm, Male.forehead_width_cm, color = "blue", label = "Male", linewidths = 0.5, edgecolor = "black")
+plt.scatter(Female.forehead_height_cm, Female.forehead_width_cm, color = "pink", label = "Male", linewidths = 0.5, edgecolor = "black")
+plt.xlabel("forehead_height_cm")
+plt.ylabel("forehead_width_cm")
+plt.legend()
+plt.show()
+
+
+//Naive bays
+data_nbc = pd.read_csv("/kaggle/input/gender-classification-dataset/gender_classification_v7.csv")
+data_nbc
+# Change gender type
+# Male : 1
+# Female : 0
+data_nbc.gender = [1 if i == "Male" else 0 for i in data_nbc.gender]
+# x_data
+x_data = data_nbc.drop(["gender"],axis = 1)
+
+# y_data
+y_data = data_nbc.gender.values
+
+# Train test split
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size = 0.3, random_state=1)
+
+
+from sklearn.naive_bayes import GaussianNB
+
+gnb = GaussianNB()
+
+gnb.fit(x_train, y_train)
+
+print("print Train for accuracy of NBC algo: ", gnb.score(x_train,y_train))
+print("print Test for accuracy of NBC algo: ", gnb.score(x_test,y_test))
+
+
+//from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
+
+# Load sample dataset (you should replace this with your own data)
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Gaussian Naive Bayes classifier
+gnb = GaussianNB()
+
+# Train the classifier
+gnb.fit(X_train, y_train)
+
+# Evaluate accuracy on the training set
+train_accuracy = gnb.score(X_train, y_train)
+print("Training accuracy of Naive Bayes Classifier:", train_accuracy)
+
+# Evaluate accuracy on the test set
+test_accuracy = gnb.score(X_test, y_test)
+print("Test accuracy of Naive Bayes Classifier:", test_accuracy)
+
+//k-Nearest //////////
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
+
+# Load sample dataset (you should replace this with your own data)
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a K-nearest neighbors classifier with k=3 (you can change k as needed)
+knn = KNeighborsClassifier(n_neighbors=3)
+
+# Train the classifier
+knn.fit(X_train, y_train)
+
+# Evaluate accuracy on the training set
+train_accuracy = knn.score(X_train, y_train)
+print("Training accuracy of KNN Classifier:", train_accuracy)
+
+# Evaluate accuracy on the test set
+test_accuracy = knn.score(X_test, y_test)
+print("Test accuracy of KNN Classifier:", test_accuracy)
+/// Decision tree/++++++++++++++++++++++++++++++***********************//\
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
+
+# Load sample dataset (you should replace this with your own data)
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Decision Tree classifier
+dt_classifier = DecisionTreeClassifier()
+
+# Train the classifier
+dt_classifier.fit(X_train, y_train)
+
+# Evaluate accuracy on the training set
+train_accuracy = dt_classifier.score(X_train, y_train)
+print("Training accuracy of Decision Tree Classifier:", train_accuracy)
+
+# Evaluate accuracy on the test set
+test_accuracy = dt_classifier.score(X_test, y_test)
+print("Test accuracy of Decision Tree Classifier:", test_accuracy)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  //Q5++++++++++++++++++++********************************************************//
+Q5Use Simple K-means algorithm for clustering on any dataset. Compare the performance of
+clusters by changing the parameters involved in the algorithm. Plot MSE computed after each
+iteration using a line plot for any set of parameters.
+import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+data = np.array([[1, 1], [1.5, 1.8], [5, 8], [8, 8], [1, 0.6], [9, 11]])
+
+n_clusters = 2
+kmeans = KMeans(n_clusters=n_clusters, random_state=0)
+kmeans.fit(data)
+
+print("Cluster centroids:")
+print(kmeans.cluster_centers_)
+
+print("Assigned cluster labels:")
+print(kmeans.labels_)
+
+
+# Plot data before clustering
+plt.scatter(data[:, 0], data[:, 1], label='Data')
+plt.title('Data before Clustering')
+plt.legend()
+plt.show()
+
+# Plot data after clustering with centroids
+plt.scatter(data[:, 0], data[:, 1], c=kmeans.labels_, label='Data')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], marker='*', s=200, c='red', label='Centroids')
+plt.title('Data after Clustering')
+plt.legend()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
